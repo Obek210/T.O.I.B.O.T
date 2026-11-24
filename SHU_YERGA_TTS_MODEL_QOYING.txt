@@ -1,0 +1,4 @@
+Mustaqil oflayn ovoz (Piper / VITS) model fayllarini shu papkaga joylang:
+- model.onnx
+- tokens.txt
+- espeak-ng-data/ (papkasi)
