@@ -1,0 +1,49 @@
+name: Build T.O.I.B.O.T Android APK
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Grant execute permission for gradlew if present
+        run: |
+          if [ -f "./gradlew" ]; then
+            chmod +x ./gradlew
+          fi
+
+      - name: Download sherpa-onnx Android AAR into app/libs
+        run: |
+          mkdir -p app/libs
+          if [ ! -f "app/libs/sherpa-onnx.aar" ]; then
+            curl -L -sS -f "https://github.com/k2-fsa/sherpa-onnx/releases/download/v1.10.23/sherpa-onnx-v1.10.23-android.aar" -o app/libs/sherpa-onnx.aar || true
+          fi
+          ls -lh app/libs/
+
+      - name: Build APK with Gradle
+        run: |
+          if [ -f "./gradlew" ]; then
+            ./gradlew assembleDebug --stacktrace
+          else
+            gradle assembleDebug --stacktrace
+          fi
+
+      - name: Upload TOIBOT APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TOIBOT-APK
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
